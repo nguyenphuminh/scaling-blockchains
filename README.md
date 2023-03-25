@@ -82,3 +82,4 @@ Second, let's talk about contract code storage. Again, a bad contract language d
 
 People seem to not realize the damages a bad smart contract language may bring. Sure, it hurts apps' performance individually, but the problem is more complicated when a language is mass-adopted. A mass-adopted smart contract language that has 3x more opcodes and 3x lower gas efficiency directly contributes to the network being 3 times less scalable than what it could have been. We don't even need to shard 3 extra chains, we need a better smart contract language designs and compilers!
 
+This solution does not help with scaling blockchains directly, as it does not add in any extra execution or data storage capacity, but rather help recover the performance that they have lost due to unoptimized use of smart contracts and help reduce chain bloat.
