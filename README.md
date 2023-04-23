@@ -5,15 +5,15 @@ Recently, the rapid growth and widespread adoption of blockchain technology have
 
 ## What to do?
 
-Before going into any solution, it's worth saying that you can not scale a blockchain network just by what it is. If you simply reduce the block time and tune up the block size, it only makes the hardware requirements of running a node for the network higher. For example, Ethereum currently has a 12 second block time and roughly 1.5mb block size which brings a hardware requirement of 8gb RAM and a duo-core CPU, comparable to an average person's computer. Bitcoin, which has a 10 minute block time and a 1mb block size, can even be ran on a phone back in 2010! Now, let's take a look at Solana, it has a 0.5 second block time and a theoretically-possible 128mb block size, and here are the requirements to barely run a node for it:
+Before going into any scaling solution, it's worth saying that you can not scale a blockchain network just by what it is. If you simply reduce the block time and tune up the block size, it only makes the hardware requirements of running a node for the network higher. For example, Ethereum currently has a 12 second block time and roughly 1.5mb block size which brings a hardware requirement of 8gb RAM and a duo-core CPU, comparable to an average person's computer. Bitcoin, which has a 10 minute block time and a 1mb block size, can even be ran on a phone back in 2010! Now, let's take a look at Solana, it has a 0.5 second block time and a theoretically-possible 128mb block size, and here are the requirements to barely run a node for it:
 
 <div align="center">
 	<img src="./assets/solana-reqs.png">
 </div>
 
-To gain performance, Solana developers make it so that only the super-rich and datacenters can run nodes!
+To gain performance, Solana developers make it so that only the super-rich and datacenters can run nodes! (For clarifications, "nodes" are user nodes - a mini-server you use to sync and read data from the blockchain, not miners or validators!)
 
-Not being able to run nodes make the network centralized as users have to rely on centralized node providing services like Infura, Moralis, Quicknode, etc. The only way to scale up a blockchain is to move the heavy work out of the blockchain while having some connection to the chain and/or use cryptographic tricks so that even when tasks are not entirely done on the blockchain, it still works correctly and trustlessly.
+Not being able to run nodes make the network centralized as users are **forced** to rely on centralized node providing services like Infura, Moralis, Quicknode, etc. The only way to scale up a blockchain is to move the heavy work out of the blockchain while having some connection to the chain and/or use cryptographic tricks so that even when tasks are not entirely done on the blockchain, it still works correctly and trustlessly.
 
 Ideally, "good" scaling solutions are:
 - "Decentralized" - People can perform those off-chain computation on their own, or there exists a network with many participants doing that for you, and this network must provide a reasonable way for people to join in (because that network is forever centralized to only those existing participants otherwise).
@@ -36,7 +36,7 @@ The basic idea of state channels is that, given a situation of a limited group o
 
 State channels are superior for large payments, people should use them to transfer money if they can because of how fast and cheap it is for the purpose. It is just as fast as normal payment applications that you are familiar with, and above all, you don't have to pay for any transfers made in state channels, the only thing you are paying for is channel creation/settlement on-chain. So if you are making hundreds of money transfers, you are just paying for 1 or 2 transactions.
 
-However, there are several drawbacks to such protocol. If there are not many transactions going on, it might not be exactly useful, because it reduces `n` transactions to just 1 or 2 transactions, so if you are just making one transfer, it does not really solve anything in that case. Furthermore, the only thing you can do is payments across a *limited group of people* due to the protocol's reliance on multisig to work. If you expand it to a global level, faulty people might not agree for others to withdraw their assets, which is why such system can only be used for a group of 2-20 people. It is also impossible to build many types of applications just by using channels, because again, it's limited to a group of parties, so something like a complex decentralized lending protocol which relies on global consensus is not possible.
+However, there are several drawbacks to such protocol. If there are not many transactions going on, it might not be exactly useful. Since it reduces `n` transactions to just 1 or 2 transactions, if you are just making one transfer, it does not really solve anything in that case. Furthermore, the only thing you can do is payments across a *limited group of people* due to the protocol's reliance on multisig to work. If you expand it to a global level, faulty people might not agree for others to withdraw their assets, which is why such system can only be used for a group of 2-20 people. It is also impossible to build many types of applications just by using channels, because again, it's limited to a group of parties, so something like a complex decentralized lending protocol which relies on global consensus is not possible.
 
 In practice, this type of scaling solution is very popular towards high-end Bitcoin users. Any serious Bitcoin user who has dig deep enough would know about Lightning Network and use it for normal payments.
 
@@ -57,13 +57,25 @@ It does suffer from one big problem though which is data availability, if there 
 
 Another approach of scaling the blockchain is to split it into many smaller chains, which reduce the overall computation and data storage needed for each of the chain, which is often called "sharding", or considered as "rollups" - another type of layer 2 scaling solution.
 
+### How **not** to shard
+
 Sharding is often misunderstood, cause many think it is just literally splitting one chain into child chains without doing anything extra. This would cause huge consensus security concerns, cause by having multiple chains with their own consensus performing a 51% attack is much easier, and if one child chain falls, the whole network falls. Another problem might be that those chains are not connected and the process of communicating between the chains might be a difficult problem.
+
+### Then how do we shard?
 
 The correct way to shard the chains is to use one chain as a consensus layer, and then have multiple child chains (or "rollups") uploading their transactions onto it. By doing this, no single child chain have to have their own consensus which means consensus security is not reduced. But the special part about this is that the child chains only care about their chain's transactions posted on the beacon chain and have their own independent state. They do not do anything with other chains' data, transactions from other chains are just there in the beacon block but ignored by them. By doing this, we have sharded transaction computation and state storage from one chain to multiple ones.
 
-To bridge the token from the beacon chain to the rollup and reverse, usually there are two classes of rollups to ensure correctness of the state - Optimistic rollups and ZK rollups. Both upload a state root as a commitment to the global rollup's state, zk rollups will have a small-and-cheap-to-verify proof that can prove correctness of a rollup block uploaded, while Optimistic rollups utilize a fraud proof system, where a rollup block is considered truthy until someone says that it doesn't and challenges the person who uploaded the block. However, if there is not a native bridge from the rollup to the layer 1 and reverse, these schemes are not needed, people often call this type of rollups "sovereign rollups" or "sovereign embedded chains" which is as independent as a normal layer 1, but does not require any extra consensus security. However, it comes with a drawback of bad economy (because it will need its own token) and insecure asset migration (cause bridge is not native to the rollup, developers will have to build layer 1 to layer 1 type of bridges).
+<div align="center">
+	<img src="./assets/beacon_chain.jpg">
+</div>
 
-But you might have noticed that the one thing we didn't shard is data availability (aka the block, the transaction batches etc). Even though everything is cheaper because state access/storage is lower, the amount of transactions handled by the entire network is still the same since the block size is still the same, and we are just processing just as much transactions! So to scale up, we would need to shard data availability (or DA sharding for short). The idea is fairly simple, you have special pieces of data on the beacon block called "blobs", and you have a cryptographic commitment of each of these blobs stored on each L1 blocks. Rollups will upload their data availability (transactions and other data) as these blobs. The unique thing about this model is that nodes will just verify these blobs once against their commitment and then drop them, only storing the commitment. Rollups store their own blobs and ignore others, but they can still request those blobs from other rollup nodes if they wanted to and verify them using the commitment stored. This is also where it is different from just increasing the block size, by increasing the block size, everyone has to store **all** of the big blocks and process **all** of the transactions, but in this case, seperate child chains deal with their individual small blocks, and they together add more throughput to the whole network. Through this solution, transaction throughput will increase since more transactions can be handled while sacrificing little computation cost. The only problem with this solution is that there are still the one-time data transportation cost and the cost to verify commitments, so we can only shard data availability to an extent.
+To bridge the token from the beacon chain to the rollup and reverse, usually there are two classes of rollups to ensure correctness of the state - Optimistic rollups and ZK rollups. Both upload a state root as a commitment to the global rollup's state, zk rollups will have a small-and-cheap-to-verify proof that can prove correctness of a rollup block uploaded, while Optimistic rollups utilize a fraud proof system, where a rollup block is considered truthy until someone says that it doesn't and challenges the person who uploaded the block. However, if there is not a native bridge from the rollup to the layer 1 and reverse, these schemes are not needed, people often call this type of rollups "sovereign rollups" or "sovereign embedded chains" which is as independent as a normal layer 1, but does not require any extra consensus security. However, it comes with a huge drawback of bad economy (because it will need its own new unnecessary token) and insecure asset migration (cause bridge is not native to the rollup, developers will have to build layer 1 to layer 1 type of bridges).
+
+But you might have noticed that the one thing we didn't shard is data availability (aka the block, the transaction batches etc). Even though everything is cheaper because state access/storage is lower, the amount of transactions handled by the entire network is still the same since the block size is still the same, and we are just processing just as much transactions! So to scale up, we would need to shard data availability (or DA for short). The idea is fairly simple, you have special pieces of data on the beacon block called "blobs", and you have a cryptographic commitment of each of these blobs stored on each L1 blocks. Rollups will upload their data availability (transactions and other data) as these blobs. The unique thing about this model is that nodes will just verify these blobs once against their commitment and then drop them, only storing the commitment. Rollups store their own blobs and ignore others, but they can still request those blobs from other rollup nodes if they wanted to and verify them using the commitment stored. This is also where it is different from just increasing the block size, by increasing the block size, everyone has to store **all** of the big blocks and process **all** of the transactions, but in this case, seperate child chains deal with their individual small blocks, and they together add more throughput to the whole network. Through this solution, transaction throughput will increase since more transactions can be handled while sacrificing little computation cost. The only problem with this solution is that there are still the one-time data transportation cost and the cost to verify commitments, so we can only shard data availability to an extent.
+
+<div align="center">
+	<img src="./assets/data-sharding.jpg">
+</div>
 
 Rollups and DA sharding are incredibly powerful in that it has the same capability as a normal blockchain network, and is the only current safe way to have a "multichain-ish" network.
 
@@ -83,9 +95,9 @@ To understand how this works, we must have a basic idea of a simple transaction,
 
 (Taken from Vitalik's blog on rollups).
 
-Overall, we have reduced a transaction with the size of ~112 bytes to somewhere around ~12 bytes - almost a ten-time improvement in transaction capacity!
+Overall, we have reduced a transaction with the size of ~112 bytes to somewhere around ~12 bytes - almost a ten-time improvement in transaction capacity! 
 
-One more important note is that in many cases of a zk rollup, some transaction fields can be removed entirely because they have been proven through the zk proof already, e.g. signatures.
+In many cases of a zk rollup, some transaction fields can be removed entirely because they have been proven through the zk proof already, e.g. signatures.
 
 ### Going layer 3?
 
@@ -98,7 +110,7 @@ Cryptographic tricks refer to all sorts of cryptography usage in optimization of
 
 ### ZK proof
 
-There are three important aspects in a blockchain: verification, execution, and data storage, succinct zk proof schemes like SNARKs or STARKs can vastly improve efficiency in verification and execution, which results in more capacity gained. 
+There are three important aspects in a blockchain: verification, execution, and data storage, succinct zk proof schemes like SNARKs or STARKs can improve efficiency in verification and execution, which results in more capacity gained.
 
 ### Data storage commitment
 
@@ -112,23 +124,30 @@ The idea is similar to what I have mentioned about DA sharding, you keep some cr
 All of the things I have mentioned earlier are pretty abstract and general, in pratice, protocol designs play a huge role in scalability. How you deal with data serialization, message gossiping, trie construction, stuff like segwit, parallel utxo transactions etc can vastly reduce cost and improve overall transaction throughput. Optimization tricks to reduce data cost, disk io cost, pruning etc from blockchain clients are also just as essential.
 
 
-## Indirect scaling solutions
+## Better smart contract languages/compilers
 
-### Better smart contract languages/compilers
+While this may sound dumb, it is actually a fair point. Bad smart contract languages/compilers are indirectly affecting true performance of several blockchain networks.
 
-While this may sound dumb, it is actually a fair point.
+First, let's talk about contract execution. A bad contract language design/compiler would produce unnecessary opcodes, meaning more execution needed. For example, a contract written in Huff or Vyper (with their current official compilers) might be twice or even three times more gas efficient than one that was written in Solidity (using the solc compiler). We don't even need to shard another chain or use another rollup in the first place for more efficiency if developers use those languages rather than Solidity.
 
-First, let's talk about contract execution. A bad contract language design/compiler would produce unnecessary opcodes, meaning more execution needed. For example, a contract written in Huff or Vyper (with their current official compilers) might be twice or even three times more gas efficient than one that was written in Solidity (using the solc compiler). We don't even need to shard another chain or use another rollup in the first place if devs adopt those languages rather than Solidity.
-
-Second, let's talk about contract code storage. Again, a bad contract language design/compiler would produce unnecessary opcodes, and that not only contribute to worsened execution efficiency, but also data storage cost for those contracts. A few months prior to the current time of writing, a research has shown that 10% of Solidity contracts in Ethereum are useless opcodes generated by the solc compiler. Yep, tens of gigabytes of the Ethereum blockchain network currently are probably solc bloat, yikes!
+Second, let's talk about contract code storage. Again, a bad contract language design/compiler would produce unnecessary opcodes, and that not only contribute to worse execution efficiency, but also data storage cost for those contracts. A few months prior to the current time of writing, a research has shown that 10% of Solidity contracts in Ethereum are useless opcodes generated by the solc compiler. Yep, tens of gigabytes of the Ethereum blockchain network currently are probably solc bloat, yikes!
 
 People seem to not realize the damages a bad smart contract language may bring. Sure, it hurts apps' performance individually, but the problem is more complicated when a language is mass-adopted. A mass-adopted smart contract language that has 3x more opcodes and 3x lower gas efficiency directly contributes to the network being 3 times less scalable than what it could have been. We don't even need to shard 3 extra chains, we need a better smart contract language designs and compilers!
 
 This solution does not help with scaling blockchains directly, as it does not add in any extra execution or data storage capacity, but rather help recover the performance that they have lost due to unoptimized use of smart contracts and help reduce chain bloat.
 
 
-## Common misconceptions
+## Misconceptions
+
+A quick recap on the misconceptions we have covered:
+- We can not just scale a blockchain by simply changing block size or block time.
+- We can not shard a chain by just simply having multiple independent chains.
 
 ### Proof-of-stake improves scalability
 
-A common misconception that most modern blockchain networks lie to users and investors about is the fact that Proof-of-stake is more scalable than Proof-of-work or other consensus mechanisms. This is actually false since consensus protocols don't bring any extra transaction execution or data storage capabilities to the network, PoS-based consensus protocols exist only as an energy-efficient way to achieve consensus compared to PoW mining. Most centralized blockchain networks that have low block time and high block size will take PoS as an excuse for their centralized scalability.
+A common misconception that most modern blockchain networks lie to users and investors about is the fact that Proof-of-stake based consensus is more scalable than Proof-of-work based consensus or other consensus mechanisms. This is actually false since consensus protocols don't bring any extra transaction execution or data storage capabilities to the network, PoS-based consensus protocols exist only as an energy-efficient way to achieve consensus compared to PoW mining. Most centralized blockchain networks that have low block time and high block size will take PoS as an excuse for their performant **but** centralized network.
+
+
+## Conclusion
+
+I believe understanding blockchain fundamentals and possible blockchain scaling solutions is crucial for participants of this industry because not only we can have a better view of what the future of blockchain technology might look like, but we can also understand what's right and wrong, what's possible and what's limited so that people would not fall for projects that might exploit users' misconceptions for their goods, so there you go, thanks for reading!
