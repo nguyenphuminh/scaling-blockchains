@@ -26,9 +26,9 @@ To start it off, we will have a look at two simplest "layer 2" scaling solutions
 
 ### State channels
 
-<center>
-    <img src="./assets/ln-logo.png">
-</center>
+<div align="center">
+	<img src="./assets/ln-logo.png">
+</div>
 
 The basic idea of state channels is that, given a situation of a limited group of people wanting to transact with each other, you can deposit assets into a smart contract on-chain, write down planned transactions, compute the result at the end on your own, not on the blockchain, and only submit one final transation to confirm this result on-chain with agreement from a *considerate* amount of the people in that group through their signatures (also known as a multisig). State channels are incredibly useful in cases where known parties have to make multiple transactions back and forth in a period of time, since it reduces all tasks to only one or two transactions, and every channel's transaction being made are done instantly because it's not on-chain, but just a mutual short-term agreement between the parties. 
 
