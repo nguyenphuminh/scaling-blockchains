@@ -51,9 +51,9 @@ It does suffer from one big problem though which is data availability, if there 
 
 ## Sharding & rollups
 
-<center>
-    <img src="./assets/fuel-celestia.jpg">
-</center>
+<div align="center">
+	<img src="./assets/fuel-celestia.jpg">
+</div>
 
 Another approach of scaling the blockchain is to split it into many smaller chains, which reduce the overall computation and data storage needed for each of the chain, which is often called "sharding", or considered as "rollups" - another type of layer 2 scaling solution.
 
