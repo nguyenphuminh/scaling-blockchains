@@ -132,6 +132,11 @@ The idea is similar to what I have mentioned about DA sharding, you keep some cr
 All of the things I have mentioned earlier are pretty abstract and general, in pratice, protocol designs play a huge role in scalability. How you deal with data serialization, message gossiping, trie construction, stuff like segwit, parallel utxo transactions etc can vastly reduce cost and improve overall transaction throughput. Optimization tricks to reduce data cost, disk io cost, pruning etc from blockchain clients are also just as essential.
 
 
+## Evade blockchain usage
+
+Try to avoid blockchain usage as much as you can if you don't really need to use a blockchain. Tasks like messasing or large data transfers should never be done on-chain, you should use a simple p2p network which is even more decentralized and infinitely faster.
+
+
 ## Better smart contract languages/compilers
 
 While this may sound dumb, it is actually a fair point. Bad smart contract languages/compilers are indirectly affecting true performance of several blockchain networks.
