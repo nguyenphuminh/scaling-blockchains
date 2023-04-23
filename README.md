@@ -7,9 +7,9 @@ Recently, the rapid growth and widespread adoption of blockchain technology have
 
 Before going into any solution, it's worth saying that you can not scale a blockchain network just by what it is. If you simply reduce the block time and tune up the block size, it only makes the hardware requirements of running a node for the network higher. For example, Ethereum currently has a 12 second block time and roughly 1.5mb block size which brings a hardware requirement of 8gb RAM and a duo-core CPU, comparable to an average person's computer. Bitcoin, which has a 10 minute block time and a 1mb block size, can even be ran on a phone back in 2010! Now, let's take a look at Solana, it has a 0.5 second block time and a theoretically-possible 128mb block size, and here are the requirements to barely run a node for it:
 
-* CPU: 16 cores / 32 threads, or more.
-* RAM: 256 GB or more.
-* 1GBit/s internet.
+<div align="center">
+	<img src="./assets/solana-reqs.png">
+</div>
 
 To gain performance, Solana developers make it so that only the super-rich and datacenters can run nodes!
 
@@ -29,6 +29,8 @@ To start it off, we will have a look at two simplest "layer 2" scaling solutions
 <div align="center">
 	<img src="./assets/ln-logo.png">
 </div>
+
+<br/>
 
 The basic idea of state channels is that, given a situation of a limited group of people wanting to transact with each other, you can deposit assets into a smart contract on-chain, write down planned transactions, compute the result at the end on your own, not on the blockchain, and only submit one final transation to confirm this result on-chain with agreement from a *considerate* amount of the people in that group through their signatures (also known as a multisig). State channels are incredibly useful in cases where known parties have to make multiple transactions back and forth in a period of time, since it reduces all tasks to only one or two transactions, and every channel's transaction being made are done instantly because it's not on-chain, but just a mutual short-term agreement between the parties. 
 
